@@ -457,10 +457,16 @@ export function StampApp() {
   const [staffSession, setStaffSession]       = useState<StaffSession | null>(null)
 
   // ── NFC URL handling ─────────────────────────────────────────────────────
+  // Depend on [searchParams] (not []) so this runs again once Next.js populates
+  // the params after hydration in the production build. The ref guard ensures we
+  // only ever act on the tap once.
+  const nfcHandled = useRef(false)
   useEffect(() => {
+    if (nfcHandled.current) return
     const nfcParam = searchParams.get('nfc')
     const tsParam  = searchParams.get('ts')
     if (nfcParam === 'true') {
+      nfcHandled.current = true
       const tsRaw      = parseInt(tsParam || '0', 10)
       const ageSeconds = Math.floor(Date.now() / 1000) - tsRaw
       const expired    = !tsRaw || ageSeconds > 900 || ageSeconds < -60
@@ -471,7 +477,7 @@ export function StampApp() {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [searchParams])
 
   function enterNfcValid() {
     setState('NFC_VALID')
