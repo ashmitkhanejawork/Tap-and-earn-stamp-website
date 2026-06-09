@@ -427,9 +427,14 @@ export function StampApp() {
   const searchParams = useSearchParams()
   const merchant     = BEAN_AND_BREW
 
+  // localStorage keys (per merchant) for persisting a customer's progress
+  const STORAGE_KEY = `tap_and_earn_stamps_${merchant.id}`
+  const REDEEM_KEY  = `tap_and_earn_redeemed_${merchant.id}`
+
   // ── Core state ──────────────────────────────────────────────────────────
   const [state, setState]           = useState<PageState>('LOCKED')
-  const [count, setCount]           = useState(3) // demo: start with 3 stamps
+  const [count, setCount]           = useState(3) // demo default; overridden by saved value on mount
+  const skipPersist                 = useRef(false)
   const [popIndex, setPopIndex]     = useState(-1)
   const [glow, setGlow]             = useState<GlowState>('')
   const [showValid, setShowValid]   = useState(false)
@@ -476,6 +481,26 @@ export function StampApp() {
     setTimeout(() => setGlow(''), 700)
     setTimeout(() => setShimmer(false), 1200)
   }
+
+  // ── Persist progress in localStorage ──────────────────────────────────────
+  // Load any saved stamp count on mount (overrides the demo default of 3).
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY)
+      if (saved !== null) {
+        const n = parseInt(saved, 10)
+        if (Number.isFinite(n)) setCount(n)
+      }
+    } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Save the stamp count whenever it changes (skipped right after a redemption).
+  useEffect(() => {
+    if (skipPersist.current) { skipPersist.current = false; return }
+    try { window.localStorage.setItem(STORAGE_KEY, String(count)) } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count])
 
   // ── Stamp logic ──────────────────────────────────────────────────────────
   function addStamp({ silent = false } = {}) {
@@ -525,6 +550,12 @@ export function StampApp() {
     setRedeemOverlay(true)
     setTimeout(() => {
       setRedeemOverlay(false)
+      // Reward consumed: clear saved progress so the card starts fresh.
+      skipPersist.current = true
+      try {
+        window.localStorage.removeItem(STORAGE_KEY)
+        window.localStorage.removeItem(REDEEM_KEY)
+      } catch { /* ignore */ }
       setCount(0)
       setState('LOCKED')
       setGlow('')
