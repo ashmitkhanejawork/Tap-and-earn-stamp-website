@@ -640,6 +640,22 @@
   margin: 0;
 }
 
+/* ─── Celebration overlay (auto-plays when the card is completed) ── */
+.s-celebrate-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(46,74,63,0.96);
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  animation: sFadeIn 320ms ease-out;
+  pointer-events: none;
+}
+.s-celebrate-overlay .s-inner { text-align: center; color: var(--bone); padding: 20px; }
+.s-celebrate-overlay .s-cup { font-size: 72px; line-height: 1; animation: sCupPop 700ms cubic-bezier(.34,1.56,.64,1); }
+.s-celebrate-overlay h2 { font-family: var(--serif); font-weight: 500; font-size: 32px; margin: 18px 0 4px; color: var(--gold); }
+.s-celebrate-overlay p { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 18px; color: rgba(245,240,230,0.8); margin: 0; }
+
 /* ─── Tooltip ──────────────────────────────────────────────────── */
 .s-tooltip { position: relative; }
 .s-tooltip[data-tip]:hover::after {

@@ -260,6 +260,21 @@ function RedeemOverlay({ visible }: { visible: boolean }) {
   )
 }
 
+// ─── Celebration overlay (auto-plays the moment the card is completed) ─────────
+
+function CelebrateOverlay({ visible }: { visible: boolean }) {
+  if (!visible) return null
+  return (
+    <div className="s-celebrate-overlay" role="status" aria-live="polite">
+      <div className="s-inner">
+        <div className="s-cup">🎉</div>
+        <h2>Congratulations!</h2>
+        <p>Your free drink can be collected.</p>
+      </div>
+    </div>
+  )
+}
+
 // ─── Staff dialog ─────────────────────────────────────────────────────────────
 
 function StaffDialog({
@@ -441,6 +456,7 @@ export function StampApp() {
   const [shimmer, setShimmer]       = useState(false)
   const [code]                      = useState(() => generateCode())
   const [redeemOverlay, setRedeemOverlay] = useState(false)
+  const [celebrate, setCelebrate]   = useState(false)
   const [adding, setAdding]         = useState(false)
   const [showStampToast, setShowStampToast] = useState(false)
 
@@ -534,6 +550,9 @@ export function StampApp() {
         setTimeout(() => {
           setState('REDEEMABLE')
           setGlow('reward')
+          // Auto-play the congratulations animation the moment the card is full.
+          setCelebrate(true)
+          setTimeout(() => setCelebrate(false), 2800)
         }, 850)
       } else {
         setState('STAMPED')
@@ -581,12 +600,9 @@ export function StampApp() {
   function renderCta() {
     if (state === 'REDEEMABLE') {
       return (
-        <div className="s-tooltip" data-tip="Your barista will unlock this with their staff card">
-          <button className="s-btn s-btn--gold" aria-disabled="true"
-            onClick={(e) => e.preventDefault()}>
-            <IconLock /> Redeem reward
-          </button>
-        </div>
+        <button className="s-btn s-btn--gold" onClick={triggerRedeem}>
+          <span>Claim my free coffee</span> <span style={{ fontSize: 17 }}>☕</span>
+        </button>
       )
     }
     if (state === 'LOCKED') {
@@ -679,6 +695,7 @@ export function StampApp() {
       )}
 
       <Toaster toasts={toasts} />
+      <CelebrateOverlay visible={celebrate} />
       <RedeemOverlay visible={redeemOverlay} />
     </div>
   )
