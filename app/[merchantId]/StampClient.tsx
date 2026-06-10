@@ -433,7 +433,7 @@ export function StampApp() {
 
   // ── Core state ──────────────────────────────────────────────────────────
   const [state, setState]           = useState<PageState>('LOCKED')
-  const [count, setCount]           = useState(3) // demo default; overridden by saved value on mount
+  const [count, setCount]           = useState(0) // fresh device starts at 0; overridden by saved value on mount
   const skipPersist                 = useRef(false)
   const [popIndex, setPopIndex]     = useState(-1)
   const [glow, setGlow]             = useState<GlowState>('')
